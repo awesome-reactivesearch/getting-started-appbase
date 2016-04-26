@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Streaming search with Appbase with Historical data</title>
+	<script src="https://rawgit.com/appbaseio/appbase-js/master/browser/appbase.js" type="text/javascript"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		var config = {
+			appname: 'jsfiddle-demo',
+			username: '7eJWHfD4P',
+			password: '431d9cea-5219-4dfb-b798-f897f3a02665',
+			type: 'Books'
+		}
+		var appbaseRef = new Appbase({
+			url: 'https://scalr.api.appbase.io',
+			appname: config.appname,
+			username: config.username,
+			password: config.password
+		});
+
+		var requestObject = {
+			type: config.type,
+			body: {
+				query: {
+					match_all: {}
+				}
+			}
+		};
+
+		var prevRef;
+		appbaseRef.search(requestObject).on('data', function(result) {
+			if (prevRef) {
+				prevRef.stop()
+			}
+			document.write("Historical data: ",JSON.stringify(result.hits.hits));
+			prevRef = appbaseRef.searchStream(requestObject).on('data', function(stream) {
+				document.write("<br>New streaming object: ", JSON.stringify(stream))
+			}).on('error', function(error) {
+				document.write("<br>Query error: ", JSON.stringify(error))
+			})
+		})
+	</script>
+</body>
+</html>
